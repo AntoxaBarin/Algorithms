@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+// Сумма на отрезке {
 void build_tree(std::vector<int> &array, std::vector<int> &tree, int v, int l, int r) {
     if (l == r) {
         tree[v] = array[l];
@@ -22,6 +23,51 @@ int segment_sum(std::vector<int> &tree, int v, int l, int r, int req_l, int req_
     return segment_sum(tree,v * 2,  l, m, req_l, std::min(req_r, m))
            + segment_sum (tree, v * 2 + 1, m + 1, r, std::max(req_l, m + 1), req_r);
 }
+// }
+
+// Поиск максимума на отрезке {
+struct Node {
+    int value;
+    int index;
+};
+
+void build_tree(std::vector<int> &array, std::vector<Node> &tree, int v, int l, int r) {
+    if (l == r) {
+        tree[v].value = array[l];
+        tree[v].index = l;
+    }
+    else {
+        int m = (l + r) / 2;
+        build_tree(array, tree, v * 2, l, m);
+        build_tree(array, tree, v * 2 + 1, m + 1, r);
+
+        if (tree[v * 2].value > tree[v * 2 + 1].value) {
+            tree[v] = tree[v * 2];
+        }
+        else {
+            tree[v] = tree[v * 2 + 1];
+        }
+    }
+}
+
+Node segment_max(std::vector<Node> &tree, int v, int l, int r, int req_l, int req_r) {
+    if (req_l > req_r)
+        return {-1000000001, 0};
+    if (req_l == l && req_r == r)
+        return tree[v];
+
+    int m = (l + r) / 2;
+    Node left = segment_max(tree, v * 2, l, m, req_l, std::min(req_r, m));
+    Node right = segment_max(tree, v * 2 + 1, m + 1, r, std::max(req_l, m + 1), req_r);
+
+    if (left.value > right.value) {
+        return left;
+    }
+    else {
+        return right;
+    }
+}
+ // }
 
 int main() {
     int n, req_l, req_r;
