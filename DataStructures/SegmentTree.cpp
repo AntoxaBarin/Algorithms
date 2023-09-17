@@ -69,6 +69,49 @@ Node segment_max(std::vector<Node> &tree, int v, int l, int r, int req_l, int re
 }
  // }
 
+ // НОД всех чисел на подотрезке {
+int gcd(int a, int b) { if (a == 0) return b; return gcd(b % a, a); }
+
+void build_gcd_tree(std::vector<int> &array, std::vector<int> &tree, int v, int l, int r) {
+    if (l == r) {
+        tree[v] = array[l];
+    }
+    else {
+        int m = (l + r) / 2;
+        build_tree(array, tree, v * 2, l, m);
+        build_tree(array, tree, v * 2 + 1, m + 1, r);
+        tree[v] = gcd(tree[v * 2], tree[v * 2 + 1]);
+    }
+}
+
+int segment_gcd(std::vector<int> &tree, int v, int l, int r, int req_l, int req_r) {
+    if (req_l > req_r)
+        return 0;
+    if (req_l == l && req_r == r)
+        return tree[v];
+
+    int m = (l + r) / 2;
+    return gcd(segment_gcd(tree,v * 2,  l, m, req_l, std::min(req_r, m)),
+               segment_gcd(tree,v * 2 + 1,  m + 1, r, std::max(req_l, m + 1), req_r));
+}
+
+void update(std::vector<int> &tree, int v, int l, int r, int position, int new_val) {
+    if (l == r) {
+        tree[v] = new_val;
+    }
+    else {
+        int m = (l + r) / 2;
+        if (position <= m) {
+            update(tree, v * 2, l, m, position, new_val);
+        }
+        else {
+            update(tree, v * 2 + 1, m + 1, r, position, new_val);
+        }
+        tree[v] = gcd(tree[v * 2], tree[v * 2 + 1]);
+    }
+}
+ // }
+
 int main() {
     int n, req_l, req_r;
     std::cin >> n >> req_l >> req_r;
