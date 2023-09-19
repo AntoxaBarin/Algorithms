@@ -112,6 +112,71 @@ void update(std::vector<int> &tree, int v, int l, int r, int position, int new_v
 }
  // }
 
+// Поиск к-того нуля на подотрезке (выдает индекс)
+
+void build_tree_kth(std::vector<int> &array, std::vector<int> &tree, int v, int l, int r) {
+    if (l == r) {
+        if (array[l] == 0)
+            tree[v] = 1;
+        else
+            tree[v] = 0;
+    }
+    else {
+        int m = (l + r) / 2;
+        build_tree(array, tree, v * 2, l, m);
+        build_tree(array, tree, v * 2 + 1, m + 1, r);
+        tree[v] = tree[v * 2] + tree[v * 2 + 1];
+    }
+}
+
+int find_kth(std::vector<int> &tree, int v, int l, int r, int req_l, int req_r, int k) {
+    if (k > tree[v]) {
+        return -1;
+    }
+    if (l == r) {
+        return l + 1;
+    }
+    int m = (l + r) / 2;
+    if (req_l > m) {
+        return find_kth(tree, v * 2 + 1, m + 1, r, req_l, req_r, k);
+    }
+    if (req_r <= m) {
+        return find_kth(tree, v * 2, l, m, req_l, req_r, k);
+    }
+    auto abobus = segment_sum(tree,v * 2,  l, m, req_l, std::min(req_r, m));
+    if (abobus >= k) {
+        return find_kth(tree,v * 2,  l, m, req_l, std::min(req_r, m), k);
+    }
+    else {
+        return find_kth(tree,v * 2 + 1, m + 1, r, std::max(req_l, m + 1), req_r, k - abobus);
+    }
+
+}
+
+void update_kth(std::vector<int> &tree, int v, int l, int r, int position, int new_val) {
+    if (l == r) {
+        if (new_val == 0) {
+            tree[v] = 1;
+        }
+        else {
+            tree[v] = 0;
+        }
+    }
+    else {
+        int m = (l + r) / 2;
+        if (position <= m) {
+            update(tree, v * 2, l, m, position, new_val);
+        }
+        else {
+            update(tree, v * 2 + 1, m + 1, r, position, new_val);
+        }
+        tree[v] = tree[v * 2] + tree[v * 2 + 1];
+    }
+}
+
+// }
+
+
 int main() {
     int n, req_l, req_r;
     std::cin >> n >> req_l >> req_r;
